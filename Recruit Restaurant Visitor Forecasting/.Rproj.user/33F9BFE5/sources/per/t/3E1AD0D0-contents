@@ -1,0 +1,156 @@
+---
+title: "酒店顾客数预测"
+output: html_notebook
+---
+
+# 数据分析
+数据包括air系统和hpg系统的顾客预定数据，以及air系统的实际访问数据。
+air系统和hpg系统数据实际上会指代同一家酒店，通过id关系映射。并且id对应了酒店的风格类型、区域名称和经纬度。
+时间序列相关的会有工作日和是否日本节假日的信息。
+
+```{r, message=FALSE}
+library(readr)
+library(dplyr)
+library(data.table)
+
+library(tidyr)
+library(tibble)
+
+library(ggplot2)
+
+library(lubridate)
+library(tseries)
+library(forecast)
+library(prophet)
+```
+
+```{r, message=FALSE}
+air_reserve <- read_csv("air_reserve.csv")
+hpg_reserve <- read_csv("hpg_reserve.csv")
+air_visited <- read_csv("air_visit_data.csv")
+id_relation <- read_csv("store_id_relation.csv")
+air_store <- read_csv("air_store_info.csv")
+hpg_store <- read_csv("hpg_store_info.csv")
+date_info <- read_csv("date_info.csv")
+test <- read_csv("sample_submission.csv")
+```
+
+将不同系统的酒店的数据按id映射统一起来，以air系统的id为准。但实际上重合可用的id并不多，4690家中只有63家是重复的。
+
+```{r, message=FALSE}
+hpg_store <- left_join(hpg_store, id_relation)
+hpg_reserve <- left_join(hpg_reserve, id_relation)
+sum(!is.na(hpg_store$air_store_id))
+```
+
+# 方法1: ARIMA时间序列预测
+判断历史酒店访问情况是否包含了AIR酒店，但是却没有hpg酒店的历史数据。
+```{r}
+length(unique(air_visited$air_store_id))
+```
+
+可视化一家AIR酒店的历史访问情况。
+```{r}
+air_id <- "air_ba937bf13d40fb24"
+temp <- air_visited[air_visited$air_store_id==air_id,]
+ggplot(data = temp) +
+  geom_line(aes(x=visit_date, y=visitors))
+```
+
+使用最后39天作为测试集。
+```{r}
+test_len <- test %>% 
+  separate(id, c("air","store_id","date"), sep="_") %>%
+  distinct(date) %>%
+  nrow()
+```
+
+时间序列建模并预测。
+```{r}
+air_id = "air_ba937bf13d40fb24"
+
+max_date <- max(air_visited$visit_date)
+split_date <- max_date - test_len
+visit_date = seq(min(air_visited$visit_date), max(air_visited$visit_date), 1)
+all_visits <- tibble(visit_date)
+
+foo <- air_visited %>% 
+  filter(air_store_id == air_id)
+
+visits <- foo %>%
+  right_join(all_visits, by="visit_date") %>%
+  mutate(visitors = log1p(visitors)) %>%
+  replace_na(list(visitors = median(log1p(foo$visitors)))) %>%
+  rownames_to_column()
+
+visits_train <- visits %>% filter(visit_date<=split_date)
+visits_valid <- visits %>% filter(visit_date>split_date)
+
+arima.fit <- auto.arima(tsclean(ts(visits_train$visitors, frequency = 7)), stepwise = FALSE, approximation = FALSE)
+
+arima_visit <- arima.fit %>% forecast(h=test_len, level=c(50,95))
+arima_visit %>% autoplot +
+  geom_line(aes(as.integer(rowname)/7, visitors), data=visits_valid, color="gray40")
+```
+
+# Prophet方法
+```{r}
+visits_p <- foo %>%
+  right_join(all_visits, by="visit_date") %>%
+  mutate(visitors = log1p(visitors)) %>%
+  rownames_to_column() %>%
+  select(y = visitors, ds = visit_date)
+
+visits_train_p <- visits_p %>% filter(ds <= split_date)
+visits_valid_p <- visits_p %>% filter(ds > split_date)
+
+proph <- prophet(visits_train_p, changepoint.prior.scale=0.5, yearly.seasonality=FALSE)
+
+future <- make_future_dataframe(proph, periods = test_len)
+fcast <- predict(proph, future)
+
+fcast %>%
+  as.tibble() %>%
+  mutate(ds = date(ds)) %>%
+  ggplot(aes(ds, yhat)) + 
+  geom_ribbon(aes(x = ds, ymin = yhat_lower, ymax = yhat_upper), fill = "light blue") +
+  geom_line(colour = "blue") +
+  geom_line(data = visits_train_p, aes(ds, y), colour = "black") +
+  geom_line(data = visits_valid_p, aes(ds, y), colour = "grey50")
+```
+
+# 封装Prophet并引入节假日信息
+```{r}
+predict_future <- function(store_id) {
+  foo <- air_visited %>% 
+    filter(air_store_id == store_id)
+  
+  visits_p <- foo %>%
+    right_join(all_visits, by="visit_date") %>%
+    mutate(visitors = log1p(visitors)) %>%
+    rownames_to_column() %>%
+    select(y = visitors, ds = visit_date)
+  
+  proph <- prophet(visits_p, changepoint.prior.scale=0.5, yearly.seasonality=FALSE)
+  
+  future <- make_future_dataframe(proph, periods = test_len)
+  fcast <- predict(proph, future)
+  fcast %>%
+    slice((n()-test_len+1):n()) %>%
+    mutate(id = paste(store_id, ds, sep="_")) %>%
+    mutate(vistors = yhat) %>%
+    select(id, vistors)
+}
+
+store_name <- test %>% 
+  separate(id, c("air","store_id","date"), sep="_") %>%
+  unite("name",c("air", "store_id"), sep="_") %>%
+  distinct(name)
+
+#b = predict_future(air_id)
+for (i in 1:nrow(store_name)) {
+  store <- unlist(store_name[i,])
+  temp <- predict_future(store)
+  fwrite(temp, "submit.csv",append=T, sep=",")
+}
+```

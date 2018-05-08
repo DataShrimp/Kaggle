@@ -1,0 +1,4 @@
+"0","dt$Deck <- factor(sapply(dt$Cabin, function(x) strsplit(x,NULL)[[1]][1]))"
+"0","ggplot(dt[Embarked!=""""], aes(x=Embarked, y=Fare, fill=factor(Pclass))) +"
+"0","  geom_boxplot() +"
+"0","  geom_hline(aes(yintercept=80), colour='red')"

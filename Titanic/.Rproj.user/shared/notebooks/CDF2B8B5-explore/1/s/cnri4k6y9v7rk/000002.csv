@@ -1,0 +1,3 @@
+"0","pred <- predict(rf.model, dt.test)"
+"0","ret <- data.frame(PassengerId=dt.test$PassengerId, Survived=pred)"
+"0","write.csv(ret, 'submission.csv', row.names=F)"

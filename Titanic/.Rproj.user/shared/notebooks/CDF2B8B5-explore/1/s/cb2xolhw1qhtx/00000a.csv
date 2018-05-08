@@ -1,0 +1,2 @@
+"0","# imputation"
+"0","dt[Embarked==""""]$Embarked <- 'C'"

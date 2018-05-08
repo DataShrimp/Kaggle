@@ -1,0 +1,4 @@
+"0","air_id <- ""air_ba937bf13d40fb24"""
+"0","temp <- air_visited[air_visited$air_store_id==air_id,]"
+"0","ggplot(data = temp) +"
+"0","  geom_line(aes(x=visit_date, y=visitors))"

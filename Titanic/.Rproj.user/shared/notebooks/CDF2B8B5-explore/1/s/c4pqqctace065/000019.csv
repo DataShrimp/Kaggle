@@ -1,0 +1,1 @@
+"0","dt[is.na(Fare)]$Fare <- median(dt[Pclass==3 & Embarked==""S""]$Fare,na.rm=T)"

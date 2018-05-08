@@ -1,0 +1,3 @@
+"0","mice_output <- complete(mice_mod)"
+"0","par(mfrow=c(1,2))"
+"0","hist(dt$Age, main='Age: Original', col='darkgreen')"

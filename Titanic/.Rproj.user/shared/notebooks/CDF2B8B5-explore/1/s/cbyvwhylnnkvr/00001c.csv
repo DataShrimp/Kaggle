@@ -1,0 +1,1 @@
+"0","hist(mice_output$Age, main='Age: Imputation', col='lightgreen')"

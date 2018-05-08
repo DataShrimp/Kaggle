@@ -1,0 +1,5 @@
+"0","library(ggplot2)"
+"0","dt$Fsize <- dt$SibSp + dt$Parch + 1"
+"0","ggplot(data=dt[!is.na(Survived)], aes(x=Fsize, fill=factor(Survived))) + "
+"0","  geom_bar(position=""dodge"") +"
+"0","  labs(x=""Family Size"")"

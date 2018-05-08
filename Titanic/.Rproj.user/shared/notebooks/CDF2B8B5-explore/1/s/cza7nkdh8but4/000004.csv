@@ -1,0 +1,2 @@
+"0","factor.set <- c('Sex','Embarked','Title','FsizeD','Child','Mother')"
+"0","dt[,(factor.set):=lapply(dt[,factor.set,with=F], function(x) as.factor(x))]"

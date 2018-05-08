@@ -1,0 +1,7 @@
+"0","hpg_store <- left_join(hpg_store, id_relation)"
+"0","hpg_reserve <- left_join(hpg_reserve, id_relation)"
+"0","sum(!is.na(hpg_store$air_store_id))"
+"1","[1]"
+"1"," 63"
+"1","
+"

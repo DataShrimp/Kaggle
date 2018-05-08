@@ -1,0 +1,3 @@
+"0","set.seed(123)"
+"0","rf.model <- randomForest(factor(Survived) ~ Pclass+Sex+Age+SibSp+Parch+Fare+Embarked+Title+FsizeD+Child+Mother, data=dt.train)"
+"0","plot(rf.model)"

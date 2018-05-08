@@ -1,0 +1,24 @@
+{
+    "collab_server" : "",
+    "contents" : "",
+    "created" : 1517632889506.000,
+    "dirty" : false,
+    "encoding" : "UTF-8",
+    "folds" : "",
+    "hash" : "1243943200",
+    "id" : "3E1AD0D0",
+    "lastKnownWriteTime" : 1517632899,
+    "last_content_update" : 1517632899171,
+    "path" : "~/Downloads/Recruit Restaurant Visitor Forecasting/酒店顾客预测.Rmd",
+    "project_path" : "酒店顾客预测.Rmd",
+    "properties" : {
+        "chunk_output_type" : "inline",
+        "cursorPosition" : "12,14",
+        "scrollLine" : "4",
+        "tempName" : "Untitled1"
+    },
+    "relative_order" : 1,
+    "source_on_save" : false,
+    "source_window" : "",
+    "type" : "r_markdown"
+}

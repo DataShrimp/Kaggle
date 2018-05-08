@@ -1,0 +1,5 @@
+"0","dt$FsizeD <- ''"
+"0","dt[Fsize==1]$FsizeD <- 'singlenton'"
+"0","dt[Fsize>1 & Fsize<5]$FsizeD <- 'small'"
+"0","dt[Fsize>4]$FsizeD <- 'large'"
+"0","mosaicplot(table(dt$FsizeD, dt$Survived), main='Family size for survive', shade=T)"

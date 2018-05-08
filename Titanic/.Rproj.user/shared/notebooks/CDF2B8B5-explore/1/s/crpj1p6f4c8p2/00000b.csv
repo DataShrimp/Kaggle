@@ -1,0 +1,7 @@
+"0","imp <- importance(rf.model)"
+"0","varImp <- data.frame(var = row.names(imp),"
+"0","                     imp = round(imp[,1],2))"
+"0","ggplot(varImp, aes(x=reorder(var, imp), y=imp, fill=imp)) +"
+"0","  geom_bar(stat='identity') +"
+"0","  labs(x='var') +"
+"0","  coord_flip()"

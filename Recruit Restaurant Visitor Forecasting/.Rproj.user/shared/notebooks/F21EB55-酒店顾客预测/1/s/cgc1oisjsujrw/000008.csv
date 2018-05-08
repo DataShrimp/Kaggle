@@ -1,0 +1,4 @@
+"0","test_len <- test %>% "
+"0","  separate(id, c(""air"",""store_id"",""date""), sep=""_"") %>%"
+"0","  distinct(date) %>%"
+"0","  nrow()"
